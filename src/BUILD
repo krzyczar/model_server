@@ -171,7 +171,6 @@ cc_library(
         "@rapidjson//:rapidjson",
         "@spdlog//:spdlog",
         "@cxxopts//:cxxopts",
-        "@awssdk//:core",
 	    "@azure//:storage",
 	    "@cpprest//:sdk",
 	    "@boost//:lib",
@@ -182,6 +181,7 @@ cc_library(
         "@tensorflow_serving//tensorflow_serving/util:json_tensor",
         "@openvino//:openvino",
         "@opencv//:opencv",
+        "@awssdk//:core",
     ],
     local_defines = [
         "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG"
