@@ -25,7 +25,7 @@ parser.add_argument('--images_dir', required=True,
                     help='Path to a directory with images in JPG or PNG format')
 parser.add_argument('--grpc_address', required=False, default='localhost',
                     help='Specify url to grpc service. default:localhost')
-parser.add_argument('--grpc_port', required=False, default=9000,
+parser.add_argument('--grpc_port', type=int, required=False, default=9000,
                     help='Specify port to grpc service. default: 9000')
 parser.add_argument('--model_name', default='resnet', help='Model name to query. default: resnet',
                     dest='model_name')
@@ -68,4 +68,4 @@ for i, img in enumerate(imgs):
 
     # response post processing
     label, confidence_score = resnet_postprocess(response, output_name)
-    print(f"Image {imgs_paths[i]} has been classified as {label} with {confidence_score}% confidence")
+    print(f"Image {imgs_paths[i]} has been classified as {label} with {confidence_score*100}% confidence")
