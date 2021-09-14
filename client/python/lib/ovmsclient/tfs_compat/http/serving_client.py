@@ -14,7 +14,11 @@
 # limitations under the License.
 #
 
+import requests
+
 from ovmsclient.tfs_compat.base.serving_client import ServingClient
+from ovmsclient.tfs_compat.http.requests import HttpModelStatusRequest
+from ovmsclient.tfs_compat.http.responses import HttpModelStatusResponse
 
 
 class HttpClient(ServingClient):
@@ -107,7 +111,16 @@ class HttpClient(ServingClient):
             >>> type(response)
         '''
 
-        raise NotImplementedError
+        HttpClient._check_model_status_request(request)
+
+        raw_response = None
+        try:
+            raw_response = requests.get(f"http://{self.address}:{self.port}/v1/models/{request.model_name}/versions/{request.model_version}",
+                         cert=self.client_key, verify=self.server_cert)
+        except requests.exceptions.ConnectionError as e_info:
+            raise Exception('exception')
+
+        return HttpModelStatusResponse(raw_response)
 
     @classmethod
     def _build(cls, config):
@@ -121,7 +134,14 @@ class HttpClient(ServingClient):
             if "client_cert_path" in tls_config and "client_key_path" in tls_config:
                 client_cert = (tls_config["client_cert_path"], tls_config["client_key_path"])
             server_cert = tls_config.get('server_cert_path', None),
-        cls(address, port, client_cert, server_cert)
+        return cls(address, port, client_cert, server_cert)
+
+    @classmethod
+    def _check_model_status_request(cls, request):
+
+        if not isinstance(request, HttpModelStatusRequest):
+            raise TypeError('request type should be HttpModelStatusRequest, '
+                            f'but is {type(request).__name__}')
 
 
 def make_http_client(config):
