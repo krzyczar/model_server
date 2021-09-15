@@ -15,6 +15,7 @@
 #
 
 import json
+import requests
 from numpy import array, int32, float32, float128
 
 from config import * # noqa
@@ -136,4 +137,11 @@ PARSE_INPUT_DATA_INVALID = [
             [bytes([0x13, 0x00, 0x00, 0x00, 0x08, 0x00]),
              bytes([0x13, 0x00, 0x00, 0x00, 0x08, 0x00])]
      ], ValueError, "bytes values with dtype DT_STRING must be in shape [N]"),
+]
+
+MODEL_STATUS_REQUEST_INVALID_REQUEST_TYPE = [
+    (requests.Request(), TypeError, 'request type should be HttpModelStatusRequest, '
+     f'but is Request'),
+    ("request", TypeError, 'request type should be HttpModelStatusRequest, '
+     f'but is str')
 ]
