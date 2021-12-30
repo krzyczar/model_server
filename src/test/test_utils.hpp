@@ -212,6 +212,14 @@ public:
         ModelManager::updateConfigurationWithoutConfigFile();
     }
 };
+
+class ResourcesAccessModelManager : public ConstructorEnabledModelManager {
+public:
+    int getResourcesSize() {
+        return resources.size();
+    }
+};
+
 class TestWithTempDir : public ::testing::Test {
 protected:
     void SetUp() override {
