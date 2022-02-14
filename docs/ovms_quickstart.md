@@ -86,7 +86,7 @@ Model scripts are available to provide an easy way to access the Model Server. T
 1. Use this command to download all necessary components:
 
 ```
-curl https://raw.githubusercontent.com/openvinotoolkit/model_server/main/demos/common/python/client_utils.py -o client_utils.py https://raw.githubusercontent.com/openvinotoolkit/model_server/main/demos/face_detection/python/face_detection.py -o face_detection.py  https://raw.githubusercontent.com/openvinotoolkit/model_server/main/demos/common/python/requirements.txt -o client_requirements.txt
+curl https://raw.githubusercontent.com/openvinotoolkit/model_server/develop/demos/common/python/client_utils.py -o client_utils.py https://raw.githubusercontent.com/openvinotoolkit/model_server/develop/demos/face_detection/python/face_detection.py -o face_detection.py  https://raw.githubusercontent.com/openvinotoolkit/model_server/develop/demos/common/python/requirements.txt -o client_requirements.txt
 ```
 
 For more information:
@@ -101,7 +101,7 @@ For more information:
 2. Put the image in a folder by itself. The script runs inference on all images in the folder.
 
 ```
-curl --create-dirs https://raw.githubusercontent.com/openvinotoolkit/model_server/main/demos/common/static/images/people/people1.jpeg -o images/people1.jpeg
+curl --create-dirs https://raw.githubusercontent.com/openvinotoolkit/model_server/develop/demos/common/static/images/people/people1.jpeg -o images/people1.jpeg
 ```
 
 ### Step 7: Run Inference
