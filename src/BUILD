@@ -422,6 +422,22 @@ cc_binary(
     ]
 )
 
+cc_binary(
+    name = "cache_bug",
+    srcs = [
+        "cache_bug.cpp",
+    ],
+    linkopts = [
+        "-lxml2",
+        "-luuid",
+        "-lstdc++fs",
+        "-lcrypto",
+    ],
+    deps = [
+        "//src:ovms_lib",
+    ]
+)
+
 cc_test(
     name = "ovms_test",
     linkstatic = 1,
