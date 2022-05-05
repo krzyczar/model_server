@@ -93,7 +93,17 @@ const std::string PLATFORM = "OpenVINO";
     std::shared_ptr<ModelInstance> instance = nullptr;
     if (!version.empty()) {
         SPDLOG_DEBUG("GetModelMetadata requested model: name {}; version {}", name, version);
-        instance = model->getModelInstanceByVersion(std::stoi(version));
+        model_version_t vers = 0;
+        try {
+            vers = std::stoll(version);
+        } catch (const std::exception& e) {
+            SPDLOG_DEBUG("GetModelMetadata requested model: name {}; with version in invalid format: {}. Error: {}", name, version, e.what());
+            return Status(StatusCode::MODEL_VERSION_INVALID_FORMAT).grpc();
+        } catch (...) {
+            SPDLOG_DEBUG("GetModelMetadata requested model: name {}; with version in invalid format: {}", name, version);
+            return Status(StatusCode::MODEL_VERSION_INVALID_FORMAT).grpc();
+        }
+        instance = model->getModelInstanceByVersion(vers);
         if (instance == nullptr) {
             SPDLOG_WARN("GetModelMetadata requested model {}; version {} is missing", name, version);
             return Status(StatusCode::MODEL_VERSION_MISSING).grpc();

@@ -34,14 +34,16 @@ Status getModelInstance(const ::inference::ModelInferRequest* request,
     std::unique_ptr<ModelInstanceUnloadGuard>& modelInstanceUnloadGuardPtr) {
     OVMS_PROFILE_FUNCTION();
     ModelManager& manager = ModelManager::getInstance();
-    uint64_t vers = 0;
+    model_version_t vers = 0;
     if (!request->model_version().empty()) {
         try {
-            vers = std::stoi(request->model_version()); // TODO change conversion
-        } catch(std::exception& e) {
-            SPDLOG_ERROR("ER"); // TODO read exception and raise error
+            vers = std::stoll(request->model_version());
+        } catch (const std::exception& e) {
+            SPDLOG_DEBUG("requested model: name {}; with version in invalid format: {}; error: {}", request->model_name(), request->model_version(), e.what());
+            return StatusCode::MODEL_VERSION_INVALID_FORMAT;
         } catch (...) {
-            SPDLOG_ERROR("ER"); // TODO read exception and raise error
+            SPDLOG_DEBUG("requested model: name {}; with version in invalid format: {}", request->model_name(), request->model_version());
+            return StatusCode::MODEL_VERSION_INVALID_FORMAT;
         }
     }
     return manager.getModelInstance(request->model_name(), vers, modelInstance, modelInstanceUnloadGuardPtr);
