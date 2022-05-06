@@ -81,7 +81,8 @@ public:
             predictsWaitingBeforeGettingModelInstance.emplace_back(
                 std::thread(
                     [this, initialBatchSize, &releaseWaitBeforeGettingModelInstance, i]() {
-                        tensorflow::serving::PredictRequest request = preparePredictRequest(
+                        tensorflow::serving::PredictRequest request;
+                        preparePredictRequest(request,
                             {{DUMMY_MODEL_INPUT_NAME,
                                 std::tuple<ovms::shape_t, tensorflow::DataType>{{(initialBatchSize + (i % 3)), 10}, tensorflow::DataType::DT_FLOAT}}});
 
@@ -93,7 +94,8 @@ public:
             predictsWaitingBeforeInference.emplace_back(
                 std::thread(
                     [this, initialBatchSize, &releaseWaitBeforePerformInference, i]() {
-                        tensorflow::serving::PredictRequest request = preparePredictRequest(
+                        tensorflow::serving::PredictRequest request;
+                        preparePredictRequest(request,
                             {{DUMMY_MODEL_INPUT_NAME,
                                 std::tuple<ovms::shape_t, tensorflow::DataType>{{initialBatchSize, 10}, tensorflow::DataType::DT_FLOAT}}});
 
@@ -128,7 +130,8 @@ public:
             predictThreads.emplace_back(
                 std::thread(
                     [this, initialBatchSize, &releaseWaitBeforeGettingModelInstance, i]() {
-                        tensorflow::serving::PredictRequest request = preparePredictRequest(
+                        tensorflow::serving::PredictRequest request;
+                        preparePredictRequest(request,
                             {{DUMMY_MODEL_INPUT_NAME,
                                 std::tuple<ovms::shape_t, tensorflow::DataType>{{(initialBatchSize + i), 10}, tensorflow::DataType::DT_FLOAT}}});
                         performPredict(config.getName(), config.getVersion(), request,
@@ -177,7 +180,8 @@ public:
     }
 
     ovms::Status performInferenceWithShape(tensorflow::serving::PredictResponse& response, const ovms::shape_t& shape = {1, 10}, const tensorflow::DataType precision = tensorflow::DataType::DT_FLOAT) {
-        auto request = preparePredictRequest(
+        tensorflow::serving::PredictRequest request;
+        preparePredictRequest(request,
             {{DUMMY_MODEL_INPUT_NAME, std::tuple<ovms::shape_t, tensorflow::DataType>{shape, precision}}});
         return performInferenceWithRequest(request, response);
     }
@@ -185,13 +189,15 @@ public:
     ovms::Status performInferenceWithBatchSize(tensorflow::serving::PredictResponse& response, int batchSize = 1, const tensorflow::DataType precision = tensorflow::DataType::DT_FLOAT, const size_t batchSizePosition = 0) {
         ovms::shape_t shape = {1, 10};
         shape[batchSizePosition] = batchSize;
-        auto request = preparePredictRequest(
+        tensorflow::serving::PredictRequest request;
+        preparePredictRequest(request,
             {{DUMMY_MODEL_INPUT_NAME, std::tuple<ovms::shape_t, tensorflow::DataType>{shape, precision}}});
         return performInferenceWithRequest(request, response);
     }
 
     ovms::Status performInferenceWithImageInput(tensorflow::serving::PredictResponse& response, const std::vector<size_t>& shape, const std::vector<float>& data = {}, const std::string& servableName = "increment_1x3x4x5", int batchSize = 1, const tensorflow::DataType precision = tensorflow::DataType::DT_FLOAT) {
-        auto request = preparePredictRequest(
+        tensorflow::serving::PredictRequest request;
+        preparePredictRequest(request,
             {{INCREMENT_1x3x4x5_MODEL_INPUT_NAME, std::tuple<ovms::shape_t, tensorflow::DataType>{shape, precision}}}, data);
         return performInferenceWithRequest(request, response, servableName);
     }
@@ -290,14 +296,15 @@ void TestPredict<RequestType>::performPredict(const std::string modelName,
 
 using TestPredictTFS = TestPredict<tensorflow::serving::PredictRequest>;
 using MyTypes = ::testing::Types<
-    tensorflow::serving::PredictRequest,
-    ::inference::ModelInferRequest>;
+    tensorflow::serving::PredictRequest>;
+// ::inference::ModelInferRequest>;
 TYPED_TEST_SUITE(TestPredict, MyTypes);
 
 //TEST_F(TestPredictTFS, SuccesfullOnDummyModel) {
 TYPED_TEST(TestPredict, SuccesfullOnDummyModel) {
-    //tensorflow::serving::PredictRequest request = preparePredictRequest(
-    TypeParam request = preparePredictRequest(
+    //tensorflow::serving::PredictRequest request;
+    TypeParam request;
+    preparePredictRequest(request,
         {{DUMMY_MODEL_INPUT_NAME,
             std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 10}, tensorflow::DataType::DT_FLOAT}}});
     ovms::ModelConfig config = DUMMY_MODEL_CONFIG;
@@ -358,7 +365,8 @@ public:
 };
 
 TEST_F(TestPredictWithMapping, SuccesfullOnDummyModelWithMapping) {
-    tensorflow::serving::PredictRequest request = preparePredictRequest(
+    tensorflow::serving::PredictRequest request;
+    preparePredictRequest(request,
         {{dummyModelInputMapping,
             std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 10}, tensorflow::DataType::DT_FLOAT}}});
     ovms::ModelConfig config = DUMMY_MODEL_CONFIG;
@@ -369,7 +377,8 @@ TEST_F(TestPredictWithMapping, SuccesfullOnDummyModelWithMapping) {
 }
 
 TEST_F(TestPredictTFS, SuccesfullReloadFromAlreadyLoadedWithNewBatchSize) {
-    tensorflow::serving::PredictRequest request = preparePredictRequest(
+    tensorflow::serving::PredictRequest request;
+    preparePredictRequest(request,
         {{DUMMY_MODEL_INPUT_NAME,
             std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 10}, tensorflow::DataType::DT_FLOAT}}});
     ovms::ModelConfig config = DUMMY_MODEL_CONFIG;
@@ -491,7 +500,8 @@ TEST_F(TestPredictTFS, SuccesfullReshapeViaRequestOnDummyModel) {
     auto status = manager.getModelInstance("dummy", 0, model, unload_guard);
 
     // Prepare request with 1x5 shape, expect reshape
-    tensorflow::serving::PredictRequest request = preparePredictRequest(
+    tensorflow::serving::PredictRequest request;
+    preparePredictRequest(request,
         {{DUMMY_MODEL_INPUT_NAME,
             std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 5}, tensorflow::DataType::DT_FLOAT}}});
 
@@ -1083,7 +1093,8 @@ TEST_F(TestPredictTFS, PerformInferenceDummyFp32) {
 
     tensorflow::serving::PredictResponse response;
 
-    auto request = preparePredictRequest({{"input:0", std::tuple<ovms::shape_t, tensorflow::DataType>{{3, 10}, tensorflow::DataType::DT_DOUBLE}}});
+    tensorflow::serving::PredictRequest request;
+preparePredictRequest(request,{{"input:0", std::tuple<ovms::shape_t, tensorflow::DataType>{{3, 10}, tensorflow::DataType::DT_DOUBLE}}});
     ASSERT_EQ(performInferenceWithRequest(request, response, "dummy_fp64"), ovms::StatusCode::OK);
     checkOutputShape(response, {3, 10}, "output:0");
     ASSERT_EQ(response.outputs().at("output:0").dtype(), tensorflow::DataType::DT_DOUBLE);

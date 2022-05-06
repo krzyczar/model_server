@@ -74,7 +74,7 @@ protected:
         ON_CALL(*instance, getBatchSize()).WillByDefault(Return(1));
         ON_CALL(*instance, getModelConfig()).WillByDefault(ReturnRef(modelConfig));
 
-        request = preparePredictRequest(
+        preparePredictRequest(request,
             {
                 {"Input_FP32_1_224_224_3_NHWC",
                     std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 224, 224, 3}, tensorflow::DataType::DT_FLOAT}},
@@ -247,8 +247,8 @@ TEST_F(TfsPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
     modelConfig.setBatchingParams("auto");
 
     // First is incorrect, second is correct
-    request = preparePredictRequest({{"im_data", {{3, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
-        {"im_info", {{1, 3}, tensorflow::DataType::DT_FLOAT}}});
+    preparePredictRequest(request, {{"im_data", {{3, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
+                                       {"im_info", {{1, 3}, tensorflow::DataType::DT_FLOAT}}});
 
     servableInputs.clear();
     servableInputs = ovms::tensor_map_t{
@@ -259,8 +259,8 @@ TEST_F(TfsPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
     auto status = instance->mockValidate(&request);
     EXPECT_EQ(status, ovms::StatusCode::BATCHSIZE_CHANGE_REQUIRED);
 
-    request = preparePredictRequest({{"im_data", {{1, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
-        {"im_info", {{3, 3}, tensorflow::DataType::DT_FLOAT}}});
+    preparePredictRequest(request, {{"im_data", {{1, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
+                                       {"im_info", {{3, 3}, tensorflow::DataType::DT_FLOAT}}});
 
     status = instance->mockValidate(&request);
     EXPECT_EQ(status, ovms::StatusCode::BATCHSIZE_CHANGE_REQUIRED);
@@ -268,8 +268,8 @@ TEST_F(TfsPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
 
 TEST_F(TfsPredictValidation, RequestWrongAndCorrectShapeAuto) {
     modelConfig.parseShapeParameter("auto");
-    request = preparePredictRequest({{"im_data", {{1, 3, 900, 1344}, tensorflow::DataType::DT_FLOAT}},
-        {"im_info", {{1, 3}, tensorflow::DataType::DT_FLOAT}}});
+    preparePredictRequest(request, {{"im_data", {{1, 3, 900, 1344}, tensorflow::DataType::DT_FLOAT}},
+                                       {"im_info", {{1, 3}, tensorflow::DataType::DT_FLOAT}}});
 
     // First is incorrect, second is correct
     servableInputs.clear();
@@ -282,8 +282,8 @@ TEST_F(TfsPredictValidation, RequestWrongAndCorrectShapeAuto) {
     EXPECT_EQ(status, ovms::StatusCode::RESHAPE_REQUIRED);
 
     // First is correct, second is incorrect
-    request = preparePredictRequest({{"im_data", {{1, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
-        {"im_info", {{1, 6}, tensorflow::DataType::DT_FLOAT}}});
+    preparePredictRequest(request, {{"im_data", {{1, 3, 800, 1344}, tensorflow::DataType::DT_FLOAT}},
+                                       {"im_info", {{1, 6}, tensorflow::DataType::DT_FLOAT}}});
 
     status = instance->mockValidate(&request);
     EXPECT_EQ(status, ovms::StatusCode::RESHAPE_REQUIRED);
@@ -501,7 +501,7 @@ protected:
                 std::make_shared<ovms::TensorInfo>("Input_U8_3_1_128_CNH", ovms::Precision::U8, ovms::shape_t{3, 1, 128}, ovms::Layout{"CNH"})},
         });
 
-        request = preparePredictRequest(
+        preparePredictRequest(request,
             {
                 {"Input_FP32_224_224_3_1_HWCN",
                     std::tuple<ovms::shape_t, tensorflow::DataType>{{224, 224, 3, 1}, tensorflow::DataType::DT_FLOAT}},
@@ -577,7 +577,7 @@ protected:
         ON_CALL(*instance, getBatchSize()).WillByDefault(Return(ovms::Dimension::any()));
 
         const ovms::dimension_value_t requestBatchSize = 16;
-        request = preparePredictRequest(
+        preparePredictRequest(request,
             {
                 {"Input_FP32_any_224:512_224:512_3_NHWC",
                     std::tuple<ovms::shape_t, tensorflow::DataType>{{requestBatchSize, 300, 320, 3}, tensorflow::DataType::DT_FLOAT}},
@@ -656,7 +656,7 @@ protected:
 TEST_P(TfsPredictValidationPrecision, ValidPrecisions) {
     ovms::Precision testedPrecision = GetParam();
     mockedInputsInfo[tensorName]->setPrecision(testedPrecision);
-    request = preparePredictRequest(
+    preparePredictRequest(request,
         {
             {tensorName,
                 std::tuple<ovms::shape_t, tensorflow::DataType>{{1, DUMMY_MODEL_INPUT_SIZE}, ovms::TensorInfo::getPrecisionAsDataType(testedPrecision)}},
@@ -702,7 +702,7 @@ protected:
         ON_CALL(*instance, getBatchSize()).WillByDefault(Return(1));
         ON_CALL(*instance, getModelConfig()).WillByDefault(ReturnRef(modelConfig));
 
-        request = prepareKFSPredictRequest(
+        preparePredictRequest(request,
             {{"Input_FP32_1_224_224_3_NHWC",
                  std::tuple<ovms::shape_t, ovms::KFSDataType>{{1, 224, 224, 3}, "FP32"}},
                 {"Input_U8_1_3_62_62_NCHW",
@@ -786,7 +786,7 @@ TEST_F(KFSPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
     modelConfig.setBatchingParams("auto");
 
     // First is incorrect, second is correct
-    request = prepareKFSPredictRequest({{"im_data", {{3, 3, 800, 1344}, "FP32"}},
+    preparePredictRequest(request,{{"im_data", {{3, 3, 800, 1344}, "FP32"}},
         {"im_info", {{1, 3}, "FP32"}}});
 
     servableInputs.clear();
@@ -798,7 +798,7 @@ TEST_F(KFSPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
     auto status = instance->mockValidate(&request);
     EXPECT_EQ(status, ovms::StatusCode::BATCHSIZE_CHANGE_REQUIRED);
 
-    request = prepareKFSPredictRequest({{"im_data", {{1, 3, 800, 1344}, "FP32"}},
+    preparePredictRequest(request,{{"im_data", {{1, 3, 800, 1344}, "FP32"}},
         {"im_info", {{3, 3}, "FP32"}}});
 
     status = instance->mockValidate(&request);
@@ -807,7 +807,7 @@ TEST_F(KFSPredictValidation, RequestWrongAndCorrectBatchSizeAuto) {
 
 TEST_F(KFSPredictValidation, RequestWrongAndCorrectShapeAuto) {
     modelConfig.parseShapeParameter("auto");
-    request = prepareKFSPredictRequest({{"im_data", {{1, 3, 900, 1344}, "FP32"}},
+    preparePredictRequest(request,{{"im_data", {{1, 3, 900, 1344}, "FP32"}},
         {"im_info", {{1, 3}, "FP32"}}});
 
     // First is incorrect, second is correct
@@ -821,7 +821,7 @@ TEST_F(KFSPredictValidation, RequestWrongAndCorrectShapeAuto) {
     EXPECT_EQ(status, ovms::StatusCode::RESHAPE_REQUIRED) << status.string();
 
     // First is correct, second is incorrect
-    request = prepareKFSPredictRequest({{"im_data", {{1, 3, 800, 1344}, "FP32"}},
+    preparePredictRequest(request,{{"im_data", {{1, 3, 800, 1344}, "FP32"}},
         {"im_info", {{1, 6}, "FP32"}}});
 
     status = instance->mockValidate(&request);
@@ -938,7 +938,7 @@ protected:
                 std::make_shared<ovms::TensorInfo>("Input_U8_3_1_128_CNH", ovms::Precision::U8, ovms::shape_t{3, 1, 128}, ovms::Layout{"CNH"})},
         });
 
-        request = prepareKFSPredictRequest(
+        preparePredictRequest(request,
             {
                 {"Input_FP32_224_224_3_1_HWCN",
                     std::tuple<ovms::shape_t, ovms::KFSDataType>{{224, 224, 3, 1}, "FP32"}},
@@ -997,7 +997,7 @@ protected:
         ON_CALL(*instance, getBatchSize()).WillByDefault(Return(ovms::Dimension::any()));
 
         const ovms::dimension_value_t requestBatchSize = 16;
-        request = prepareKFSPredictRequest(
+        preparePredictRequest(request,
             {
                 {"Input_FP32_any_224:512_224:512_3_NHWC",
                     std::tuple<ovms::shape_t, ovms::KFSDataType>{{requestBatchSize, 300, 320, 3}, "FP32"}},
@@ -1059,7 +1059,7 @@ protected:
 TEST_P(KFSPredictValidationPrecision, ValidPrecisions) {
     ovms::Precision testedPrecision = GetParam();
     mockedInputsInfo[tensorName]->setPrecision(testedPrecision);
-    request = prepareKFSPredictRequest(
+    preparePredictRequest(request,
         {
             {tensorName,
                 std::tuple<ovms::shape_t, ovms::KFSDataType>{{1, DUMMY_MODEL_INPUT_SIZE}, ovms::ovmsPrecisionToKFSPrecision(testedPrecision)}},

@@ -1338,7 +1338,8 @@ public:
     }
 
     virtual tensorflow::serving::PredictRequest preparePipelinePredictRequest() {
-        tensorflow::serving::PredictRequest request = preparePredictRequest(getExpectedInputsInfo());
+        tensorflow::serving::PredictRequest request;
+        preparePredictRequest(request, getExpectedInputsInfo());
         auto& input = (*request.mutable_inputs())[pipelineInputName];
         input.mutable_tensor_content()->assign((char*)requestData.data(), requestData.size() * sizeof(float));
         return request;
@@ -1753,7 +1754,8 @@ class StressPipelineCustomNodesConfigChanges : public StressPipelineConfigChange
 
 public:
     tensorflow::serving::PredictRequest preparePipelinePredictRequest() override {
-        tensorflow::serving::PredictRequest request = preparePredictRequest(getExpectedInputsInfo());
+        tensorflow::serving::PredictRequest request;
+        preparePredictRequest(request, getExpectedInputsInfo());
         auto& input = (*request.mutable_inputs())[pipelineInputName];
         input.mutable_tensor_content()->assign((char*)requestData.data(), requestData.size() * sizeof(float));
         auto& factors = (*request.mutable_inputs())[pipelineFactorsInputName];

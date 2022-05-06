@@ -603,7 +603,8 @@ TEST_F(EnsembleFlowTest, DummyModelDirectAndPipelineInference) {
     ASSERT_EQ(status, ovms::StatusCode::OK);
 
     // Prepare request for dummy model directly
-    tensorflow::serving::PredictRequest simpleModelRequest = preparePredictRequest(
+    tensorflow::serving::PredictRequest simpleModelRequest;
+    preparePredictRequest(simpleModelRequest,
         {{DUMMY_MODEL_INPUT_NAME,
             std::tuple<ovms::shape_t, tensorflow::DataType>{{1, 10}, tensorflow::DataType::DT_FLOAT}}});
     std::vector<float> requestData{1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0};
